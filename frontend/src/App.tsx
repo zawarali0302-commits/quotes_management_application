@@ -6,9 +6,9 @@ import AddQuoteForm from "./components/AddQuoteForm";
 import TopQuotesComponent from "./components/TopQuotesComponent";
 import BannerComponent from "./components/BannerComponent";
 import FooterComponent from "./components/FooterComponent";
-import { set } from "react-hook-form";
 
 function App() {
+  const [isOpen, setIsOpen] = useState<boolean>(false)
   const [quotes, setQuotes] = useState<QuoteType[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
@@ -70,7 +70,7 @@ function App() {
     }
   }
 
-const handleEditQuote = async (id: number, updatedQuote: QuoteType) => {
+  const handleEditQuote = async (id: number, updatedQuote: QuoteType) => {
     try {
       const response = await fetch(`http://localhost:3000/api/quotes/${id}`, {
         method: 'PUT',
@@ -92,14 +92,27 @@ const handleEditQuote = async (id: number, updatedQuote: QuoteType) => {
 
   const handleRefresh = () => {
     fetchData();
-  }   
+  }
 
+  const openForm = () => {
+    setIsOpen(true);
+  }
+
+  const closeForm = () => {
+    setIsOpen(false)
+  }
   return (
     <>
-      <HeaderComponent />
+      <HeaderComponent handleOpenForm={openForm} />
       <BannerComponent />
       <TopQuotesComponent quotes={quotes} />
-      <AddQuoteForm addQuote = {handleAddQuote}/>
+
+      {isOpen && (
+        <div onClick={closeForm} className="bg-gray-500/50 fixed inset-0 flex justify-center items-center">
+          <div onClick={(e) => e.stopPropagation()}>
+            <AddQuoteForm addQuote={handleAddQuote} handleCloseForm = {closeForm} />
+          </div>
+        </div>)}
       {isLoading && <p>Loading...</p>}
       {error && <p className="text-red-500">{error}</p>}
       <QuotesListComponent quotes={quotes} deleteQuote={handleDeleteQuote} refresh={handleRefresh} editQuote={handleEditQuote} />
